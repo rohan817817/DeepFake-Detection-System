@@ -23,7 +23,7 @@ def extract_frames(video_path, num_frames = 16, size = (224, 224)):
             continue
     
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = cv2.rresize(frame, size)
+        frame = cv2.resize(frame, size)
         frame = frame.astype(np.float32) / 255.0
         
         frames.append(frame)
