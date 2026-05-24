@@ -1,3 +1,4 @@
+import os
 import torch
 import torch.nn as nn #n loss function
 import torch.optim as optim #optimizer
@@ -6,6 +7,7 @@ from models.resnet_model import DeepFakeModel
 from dataset.video_dataset import DeepFakeDataset
 from utils.data_loader import load_dataset
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 video_paths, labels = load_dataset() #auto load dataset from data directory
 
@@ -30,6 +32,27 @@ criterion = nn.CrossEntropyLoss() #loss function (measure how wrong is AI)
 
 optimizer = optim.Adam(model.parameters(), lr = 0.001) #optimizer
 
+def evaluate(model, loader, device):
+
+    model.eval()
+    predictions = []
+    actual_labels = []
+
+    with torch.no_grad(): #no need to calculate gradients during evaluation
+        for frames, labels in loader:
+            frames = frames.to(device)
+            labels = labels.to(device)
+            outputs = model(frames)
+            preds = torch.argmax(outputs, dim = 1)
+            predictions.extend(preds.cpu().numpy()) #move predictions to CPU and convert to numpy array
+            actual_labels.extend(labels.cpu().numpy()) #move actual labels to CPU and convert to numpy array
+
+    accuracy = accuracy_score(actual_labels, predictions)
+
+    return accuracy
+
+os.makedirs("outputs/checkpoints", exist_ok = True) #create directory for saving model checkpoints if it doesn't exist
+
 EPOCHS = 5
 
 for epoch in range(EPOCHS):
@@ -53,4 +76,10 @@ for epoch in range(EPOCHS):
 
     average_loss = running_loss / len(train_loader)
 
+    accuracy = evaluate(model, test_loader, device)
+
+    torch.save(model.state_dict(), "outputs/checkpoints/deepfake_model.pth") #save model checkpoint after each epoch
+    print("Model saved") #.pth stores learned weights
+
     print(f"Epoch [{epoch + 1}/{EPOCHS}] Loss: {average_loss:.4f}") 
+    print(f"Test Accuracy: {accuracy:.4f}")
