@@ -13,11 +13,11 @@ def load_dataset(data_dir = "data"):
 
     for video in real_videos:
         video_paths.append(video)
-        labels.append(1) #label 1 for real videos
+        labels.append(0) #label 0 for real videos
 
     for video in fake_videos:
         video_paths.append(video)
-        labels.append(0) #label 0 for fake videos
+        labels.append(1)#label 1 for fake videos
 
     print(f"Loaded {len(real_videos)} real videos.")
     print(f"Loaded {len(fake_videos)} fake videos.")
