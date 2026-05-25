@@ -18,7 +18,7 @@ frames = extract_frames(video_path)
 
 frames = torch.tensor(frames)
 frames = frames.permute(0, 3, 1, 2)
-frames = frames.unsqueeze(0)
+frames = frames.unsqueeze(0) #add batch dimension
 frames = frames.to(device)
 
 
