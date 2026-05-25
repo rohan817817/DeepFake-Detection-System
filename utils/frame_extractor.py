@@ -3,11 +3,13 @@ import numpy as np
 
 def extract_frames(video_path, num_frames = 16, size = (224, 224)):
     cap = cv2.VideoCapture(video_path)
+    print(f"Reading Video: {video_path}")
+
     total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     if total_frames <= 0:
         cap.release()
-        raise ValueError("Could not read video or video has no frames.")
+        raise ValueError(f"Could not read video: {video_path}")
         
         return []
     

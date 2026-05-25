@@ -7,7 +7,9 @@ from models.resnet_model import DeepFakeModel
 from dataset.video_dataset import DeepFakeDataset
 from utils.data_loader import load_dataset
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import (accuracy_score, confusion_matrix, precision_score, recall_score, f1_score)
 
 video_paths, labels = load_dataset() #auto load dataset from data directory
 
@@ -96,6 +98,8 @@ for epoch in range(EPOCHS):
     val_running_loss = 0.0
     val_correct = 0
     val_total = 0
+    all_predictions= []
+    all_labels = []
 
     with torch.no_grad():
         for frames, labels in test_loader:
@@ -108,6 +112,9 @@ for epoch in range(EPOCHS):
             val_running_loss += loss.item()
             
             _, predicted = torch.max(outputs, 1)
+
+            all_predictions.extend(predicted.cpu().numpy())
+            all_labels.extend(labels.cpu().numpy())
             
             val_total += labels.size(0)
             val_correct += (predicted == labels).sum().item() 
@@ -130,3 +137,59 @@ for epoch in range(EPOCHS):
 
     print(f"Validation Loss: {val_loss:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.2f}%")
+
+    precision = precision_score(all_labels, all_predictions, zero_division = 0) #calculate precision, set zero_division to 0 to avoid division by zero error when there are no positive predictions
+
+    recall = recall_score(all_labels, all_predictions, zero_division = 0)
+
+    f1 = f1_score(all_labels, all_predictions, zero_division = 0)
+
+    print(f"Precision: {precision:.4f}")
+    print(f"Recall: {recall:.4f}")
+    print(f"F1 Score: {f1:.4f}")
+
+    cm = confusion_matrix(all_labels, all_predictions)
+
+    plt.figure(figsize = (6, 6))
+
+    sns.heatmap(cm, annot = True, fmt = "d", cmap = "Blues", 
+                xticklabels = ["Real", "Fake"], yticklabels = ["Real", "Fake"])
+    
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.title("Confusion Matrix")
+
+    plt.savefig("outputs/graphs/confusion_matrix.png") #save confusion matrix after each epoch
+
+    plt.close()
+
+
+
+# Loss Graph
+    plt.figure(figsize = (10, 5))
+    
+    plt.plot(train_losses, label = "Training Loss")
+    plt.plot(val_losses, label = "Validation Loss")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.title("Training vs Validation Loss")
+    plt.legend() 
+
+    plt.savefig("outputs/graphs/loss_graph.png") #save loss graph after each epoch
+
+    plt.close() #close the plot to free up memory
+
+# Accuracy Graph
+    plt.figure(figsize = (10, 5))
+    plt.plot(train_accuracies, label = "Training Accuracy")
+    plt.plot(val_accuracies, label = "Validation Accuracy")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Accuracy (%)")
+    plt.title("Training vs Validation Accuracy")
+    plt.legend()
+
+    plt.savefig("outputs/graphs/accuracy_graph.png") #save accuracy graph after each epoch
+
+    plt.close()

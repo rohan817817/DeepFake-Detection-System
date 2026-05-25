@@ -6,3 +6,4 @@ outputs/
 data/
 *.mp4
 *.avi
+*.pth
