@@ -89,11 +89,12 @@ for epoch in range(EPOCHS):
     correct = 0
     total = 0
 
-    for frames, labels in train_loader:
+    for batch_idx, (frames, labels) in enumerate(train_loader):
         frames = frames.to(device)
         labels = labels.to(device)
 
         optimizer.zero_grad() #clear gradients from previous step
+        print(f"Processing batch {batch_idx}")
         outputs = model(frames)
 
         loss= criterion(outputs, labels) #calculate loss
@@ -161,9 +162,9 @@ for epoch in range(EPOCHS):
     print(f"Validation Accuracy: {val_accuracy:.2f}%")
 
     # Save best model
-    if accuracy > best_accuracy:
+    if val_accuracy > best_accuracy:
 
-        best_accuracy = accuracy
+        best_accuracy = val_accuracy
 
         torch.save(
             model.state_dict(),
