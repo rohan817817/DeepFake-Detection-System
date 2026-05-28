@@ -1,3 +1,4 @@
+import gc
 import os
 import torch
 import torch.nn as nn #n loss function
@@ -22,8 +23,8 @@ train_paths, test_paths, train_labels, test_labels = train_test_split(video_path
 train_dataset = DeepFakeDataset(train_paths, train_labels)
 test_dataset = DeepFakeDataset(test_paths, test_labels)
 
-train_loader = DataLoader(train_dataset, batch_size = 2, shuffle = True)
-test_loader = DataLoader(test_dataset, batch_size = 2, shuffle = True)
+train_loader = DataLoader(train_dataset, batch_size = 2, shuffle = True, num_workers = 0)
+test_loader = DataLoader(test_dataset, batch_size = 2, shuffle = True, num_workers = 0)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using Device:", device)
@@ -55,7 +56,7 @@ def evaluate(model, loader, device):
 
 os.makedirs("outputs/checkpoints", exist_ok = True) #create directory for saving model checkpoints if it doesn't exist
 
-EPOCHS = 5
+EPOCHS = 10
 
 train_losses = []
 val_losses = []
@@ -87,6 +88,9 @@ for epoch in range(EPOCHS):
         _, predicted = torch.max(outputs, 1) #get predicted labels
         total += labels.size(0) #count total number of samples in the batch
         correct += (predicted == labels).sum().item() #count correct predictions
+
+    torch.cuda.empty_cache() #clear GPU memory cache after each epoch
+    gc.collect()
 
     average_loss = running_loss / len(train_loader)
     epoch_accuracy = 100 * correct / total
