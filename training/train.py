@@ -12,7 +12,12 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import (accuracy_score, confusion_matrix, precision_score, recall_score, f1_score)
 
-video_paths, labels = load_dataset() #auto load dataset from data directory
+
+dataset_path = "data"
+
+CHECKPOINT_DIR = "outputs/checkpoints"
+
+video_paths, labels = load_dataset(dataset_path) #auto load dataset from data directory
 
 train_paths, test_paths, train_labels, test_labels = train_test_split(video_paths, labels, 
                                                                       test_size = 0.2, random_state = 42,
@@ -28,6 +33,17 @@ test_loader = DataLoader(test_dataset, batch_size = 2, shuffle = True, num_worke
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using Device:", device)
+
+# Best model path
+BEST_MODEL_PATH = f"{CHECKPOINT_DIR}/best_model.pth"
+
+# Create checkpoint folder
+import os
+
+os.makedirs(
+    CHECKPOINT_DIR,
+    exist_ok=True
+)
 
 model = DeepFakeModel().to(device)
 
@@ -63,6 +79,8 @@ val_losses = []
 
 train_accuracies = []
 val_accuracies = []
+
+best_accuracy = 0.0
 
 for epoch in range(EPOCHS):
     
@@ -141,6 +159,24 @@ for epoch in range(EPOCHS):
 
     print(f"Validation Loss: {val_loss:.4f}")
     print(f"Validation Accuracy: {val_accuracy:.2f}%")
+
+    # Save best model
+    if accuracy > best_accuracy:
+
+        best_accuracy = accuracy
+
+        torch.save(
+            model.state_dict(),
+            BEST_MODEL_PATH
+        )
+
+    # Save every epoch checkpoint
+    torch.save(
+        model.state_dict(),
+        f"{CHECKPOINT_DIR}/epoch_{epoch+1}.pth"
+    )
+
+    print("Best model saved.")
 
     precision = precision_score(all_labels, all_predictions, zero_division = 0) #calculate precision, set zero_division to 0 to avoid division by zero error when there are no positive predictions
 
