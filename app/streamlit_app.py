@@ -1,4 +1,11 @@
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT_DIR))
+
 import streamlit as st
+from inference.predictor import predict_video
 
 st.title("DeepFake Detection System")
 
@@ -9,6 +16,29 @@ uploaded_file = st.file_uploader("Choose a video", type = ["mp4", "avi", "mov"])
 if uploaded_file is not None:
     st.video(uploaded_file)
 
-#if uploaded_file is not None:
-   # if st.button("Analyze Video"):
-    #    s
+if uploaded_file is not None:
+    if st.button("Analyze Video"):
+        st.write("Analyzing video...")
+
+        temp_video_path = uploaded_file.name
+
+        with open(temp_video_path, "wb") as f:
+            f.write(uploaded_file.getbuffer())
+        st.write("Video uploaded Successfully.")
+
+        prediction, confidence = predict_video(temp_video_path)
+
+        if prediction == 0:
+            label = "REAL"
+        else:
+            label = "FAKE"
+
+        st.subheader("Analysis Result")
+
+        if label == "REAL":
+            st.success(f"Prediction: {label}")
+        else:
+            st.error(f"Prediction: {label}")
+
+        st.metric("Confidence", f"{confidence:.2f}%")
+
