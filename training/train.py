@@ -40,10 +40,8 @@ BEST_MODEL_PATH = f"{CHECKPOINT_DIR}/best_model.pth"
 # Create checkpoint folder
 import os
 
-os.makedirs(
-    CHECKPOINT_DIR,
-    exist_ok=True
-)
+os.makedirs(CHECKPOINT_DIR,exist_ok=True)
+os.makedirs("outputs/graphs", exist_ok=True)
 
 model = DeepFakeModel().to(device)
 
