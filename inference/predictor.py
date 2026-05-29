@@ -23,5 +23,5 @@ def predict_video(video_path):
         probabilities = F.softmax(outputs, dim = 1)
         confidence, prediction = torch.max(probabilities, 1)
 
-    return(prediction.item(), confidence.item() * 100)
+    return prediction.item(), confidence.item() * 100
                                      
