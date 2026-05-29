@@ -7,7 +7,7 @@ sys.path.append(str(ROOT_DIR))
 import streamlit as st
 from inference.predictor import predict_video
 
-st.title("DeepFake Detection System")
+st.title("🎭 DeepFake Detection System")
 
 st.write("Upload a video and the AI will determine whether it is REAL or Fake.")
 
@@ -18,13 +18,12 @@ if uploaded_file is not None:
 
 if uploaded_file is not None:
     if st.button("Analyze Video"):
-        st.write("Analyzing video...")
+        with st.spinner("Analyzing video...")
 
         temp_video_path = uploaded_file.name
 
         with open(temp_video_path, "wb") as f:
             f.write(uploaded_file.getbuffer())
-        st.write("Video uploaded Successfully.")
 
         prediction, confidence = predict_video(temp_video_path)
 
@@ -42,3 +41,16 @@ if uploaded_file is not None:
 
         st.metric("Confidence", f"{confidence:.2f}%")
 
+        if confidence >= 90:
+            risk = "HIGH RISK"
+        elif confidence >= 70:
+            risk = "MEDIUM RISK"
+        else:
+            risk = "LOW RISK"
+
+        if risk == "HIGH RISK":
+            st.error(f"Risk Level: {risk}")
+        elif risk == "MEDIUM RISK":
+            st.warning(f"Risk Level: {risk}")
+        else:
+            st.success(f"Risk Level: {risk}")
