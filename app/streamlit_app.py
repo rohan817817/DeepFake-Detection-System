@@ -57,12 +57,10 @@ if uploaded_file is not None:
         else:
             st.success(f"Risk Level: {risk}")
 
-        pdf_path = generate_report(label, confidence, risk)
-
         gradcam_path = generate_gradcam(temp_video_path)
-
+        pdf_path = generate_report(label, confidence, risk)
         st.image(gradcam_path, caption = "Grad-CAM Visualization")
 
         with open(pdf_path, "rb") as file:
-            st.download_button(label = "Download Report", data = file,
+            st.download_button(label = "Download Analysis Report", data = file,
                                file_name = "deepfake_report.pdf", mime = "application/pdf")
