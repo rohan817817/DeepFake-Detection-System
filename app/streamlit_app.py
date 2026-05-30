@@ -6,6 +6,8 @@ sys.path.append(str(ROOT_DIR))
 
 import streamlit as st
 from inference.predictor import predict_video
+from training.gradcam import generate_gradcam
+from utils.report_generator import generate_report
 
 st.title("🎭 DeepFake Detection System")
 
@@ -18,14 +20,14 @@ if uploaded_file is not None:
 
 if uploaded_file is not None:
     if st.button("Analyze Video"):
-        with st.spinner("Analyzing video...")
+        with st.spinner("Analyzing video..."):
 
-        temp_video_path = uploaded_file.name
+            temp_video_path = uploaded_file.name
 
-        with open(temp_video_path, "wb") as f:
-            f.write(uploaded_file.getbuffer())
+            with open(temp_video_path, "wb") as f:
+                f.write(uploaded_file.getbuffer())
 
-        prediction, confidence = predict_video(temp_video_path)
+            prediction, confidence = predict_video(temp_video_path)
 
         if prediction == 0:
             label = "REAL"
@@ -54,3 +56,13 @@ if uploaded_file is not None:
             st.warning(f"Risk Level: {risk}")
         else:
             st.success(f"Risk Level: {risk}")
+
+        pdf_path = generate_report(label, confidence, risk)
+
+        gradcam_path = generate_gradcam(temp_video_path)
+
+        st.image(gradcam_path, caption = "Grad-CAM Visualization")
+
+        with open(pdf_path, "rb") as file:
+            st.download_button(label = "Download Report", data = file,
+                               file_name = "deepfake_report.pdf", mime = "application/pdf")
