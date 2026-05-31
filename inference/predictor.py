@@ -22,6 +22,8 @@ def predict_video(video_path):
         outputs = model(frames)
         probabilities = F.softmax(outputs, dim = 1)
         confidence, prediction = torch.max(probabilities, 1)
+        print("Probabilities:", probabilities.cpu().numpy())
+        print("Prediction Index:", prediction.item())
 
     return prediction.item(), confidence.item() * 100
                                      
