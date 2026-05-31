@@ -9,6 +9,7 @@ import streamlit as st
 from inference.predictor import predict_video
 from training.gradcam import generate_gradcam
 from utils.report_generator import generate_report
+from inference.multimodal_predictor import multimodal_predict
 
 st.markdown("""
 <style>
@@ -98,13 +99,9 @@ if uploaded_file is not None:
             with open(temp_video_path, "wb") as f:
                 f.write(uploaded_file.getbuffer())
 
-            prediction, confidence = predict_video(temp_video_path)
+            prediction, confidence, video_conf, audio_conf = multimodal_predict(temp_video_path)
 
-        if prediction == 0:
-            label = "REAL"
-        else:
-            label = "FAKE"
-
+        label = prediction
         st.subheader("Analysis Result")
 
         if label == "REAL":
@@ -119,13 +116,33 @@ if uploaded_file is not None:
         with col2:
             st.metric("Prediction:", label)
         
+        col1, col2, col3 = st.columns(3)
 
-        if confidence >= 90:
-            risk = "HIGH RISK"
-        elif confidence >= 70:
-            risk = "MEDIUM RISK"
-        else:
-            risk = "LOW RISK"
+        with col1:
+            st.metric(
+                "Video Confidence",
+                f"{video_conf:.2f}%"
+            )
+
+        with col2:
+            st.metric(
+                "Audio Confidence",
+                f"{audio_conf:.2f}%"
+            )
+
+        with col3:
+            st.metric(
+                "Fusion Score",
+                f"{confidence:.2f}%"
+            )
+
+        if prediction == "FAKE":
+            if confidence >= 80:
+                risk = "HIGH RISK"
+            elif confidence >= 50:
+                risk = "MEDIUM RISK"
+            else:
+                risk = "LOW RISK"
 
         if risk == "HIGH RISK":
             st.error(f"Risk Level: {risk}")
@@ -135,7 +152,7 @@ if uploaded_file is not None:
             st.success(f"Risk Level: {risk}")
 
         gradcam_path = generate_gradcam(temp_video_path)
-        pdf_path = generate_report(label, confidence, risk)
+        pdf_path = generate_report(label, confidence, risk, video_conf, audio_conf, gradcam_path)
         
         st.subheader("AI ANALYSIS")
         st.image(gradcam_path, caption = "Grad-CAM Visualization")

@@ -9,7 +9,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 def predict_audio(audio_path):
     model = AudioClassifier()
 
-    model.load_state_dict(torch.load("outputs/checkpoints/audio_model.pth", map_location = device))
+    model.load_state_dict(torch.load("outputs/checkpoints/best_audio_model.pth", map_location = device))
     model = model.to(device)
     model.eval()
 
@@ -24,4 +24,4 @@ def predict_audio(audio_path):
         probabilities = F.softmax(outputs, dim = 1)
         confidence, prediction = torch.max(probabilities, 1)
 
-    return (prediction.items(), confidence.item() * 100)
+    return (prediction.item(), confidence.item() * 100)

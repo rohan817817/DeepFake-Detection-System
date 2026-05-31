@@ -1,7 +1,7 @@
 from inference.multimodal_predictor import multimodal_predict
 
 prediction, final_score, video_score, audio_score = multimodal_predict(
-    "Portal Tech P90.mp4"
+    "data/fake/1003_00027_id00371_t20i0HtPwW0.mp4"
 )
 
 print("Final Prediction:", prediction)

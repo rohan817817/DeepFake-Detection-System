@@ -8,7 +8,8 @@ from models.resnet_model import DeepFakeModel
 from utils.frame_extractor import extract_frames
 
 def generate_gradcam(video_path):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cpu")
     print("Using Device:", device)
 
     model = DeepFakeModel()
@@ -29,8 +30,8 @@ def generate_gradcam(video_path):
         nonlocal gradients
         gradients = grad_output[0]
 
-    target_layer.register_forward_hook(forward_hook)
-    target_layer.register_full_backward_hook(backward_hook)
+    forward_handle = target_layer.register_forward_hook(forward_hook)
+    backward_handle = target_layer.register_full_backward_hook(backward_hook)
 
     frames = extract_frames(video_path)
     frame = frames[0]
@@ -57,10 +58,13 @@ def generate_gradcam(video_path):
 
     #Backward Pass
     model.zero_grad()
-    output[0, predicted_class].backward()
+    output[0, predicted_class.item()].backward()
+
+    print("Activations Shape:", activations.shape)
+    print("Gradients Shape:", gradients.shape)
 
     pooled_gradients= gradients.mean(dim = [0, 2, 3]) #compute GRAD-CAM weights
-
+    print("Pooled Shape:", pooled_gradients.shape)
     activations = activations[0]
 
     for i in range(pooled_gradients.shape[0]):
@@ -85,5 +89,8 @@ def generate_gradcam(video_path):
 
     saved = cv2.imwrite("outputs/graphs/gradcam.jpg", superimposed)
     print("GradCam saved:", saved)
-    return "outputs/graphs/gradcam.jpg"
 
+    forward_handle.remove()
+    backward_handle.remove()
+
+    return "outputs/graphs/gradcam.jpg"

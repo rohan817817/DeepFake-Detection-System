@@ -1,7 +1,7 @@
 from inference.predict_audio import predict_audio
 
 prediction, confidence = predict_audio(
-    "audio.wav"
+    "audio_data/fake/1001_00007_id02342_RJPBPhJB8TA.wav"
 )
 
 if prediction == 0:

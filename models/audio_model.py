@@ -6,6 +6,8 @@ class AudioClassifier(nn.Module):
         self.fc = nn.Sequential(
             nn.Linear(40, 128),
             nn.ReLU(),
+            nn.Linear(128, 64),
+            nn.ReLU(),
             nn.Linear(64, 2)
         )
 

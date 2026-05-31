@@ -18,6 +18,8 @@ dataset_path = "data"
 CHECKPOINT_DIR = "outputs/checkpoints"
 
 video_paths, labels = load_dataset(dataset_path) #auto load dataset from data directory
+print("Real:", labels.count(0))
+print("Fake:", labels.count(1))
 
 train_paths, test_paths, train_labels, test_labels = train_test_split(video_paths, labels, 
                                                                       test_size = 0.2, random_state = 42,
@@ -29,7 +31,7 @@ train_dataset = DeepFakeDataset(train_paths, train_labels)
 test_dataset = DeepFakeDataset(test_paths, test_labels)
 
 train_loader = DataLoader(train_dataset, batch_size = 8, shuffle = True, num_workers = 0)
-test_loader = DataLoader(test_dataset, batch_size = 8, shuffle = True, num_workers = 0)
+test_loader = DataLoader(test_dataset, batch_size = 8, shuffle = False, num_workers = 0)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using Device:", device)
@@ -149,10 +151,6 @@ for epoch in range(EPOCHS):
         val_accuracies.append(val_accuracy)
 
 
-
-    torch.save(model.state_dict(), "outputs/checkpoints/deepfake_model.pth") #save model checkpoint after each epoch
-    print("Model saved") #.pth stores learned weights
-
     print(f"Epoch [{epoch + 1}/{EPOCHS}] ")
     print(f"Training Loss: {average_loss:.4f}") 
     print(f"Training Accuracy: {epoch_accuracy:.2f}%")
@@ -171,12 +169,8 @@ for epoch in range(EPOCHS):
         )
 
     # Save every epoch checkpoint
-    torch.save(
-        model.state_dict(),
-        f"{CHECKPOINT_DIR}/epoch_{epoch+1}.pth"
-    )
 
-    print("Best model saved.")
+        print("Best model saved.")
 
     precision = precision_score(all_labels, all_predictions, zero_division = 0) #calculate precision, set zero_division to 0 to avoid division by zero error when there are no positive predictions
 
@@ -189,6 +183,8 @@ for epoch in range(EPOCHS):
     print(f"F1 Score: {f1:.4f}")
 
     cm = confusion_matrix(all_labels, all_predictions)
+    print("Confusion Matrix:")
+    print(cm)
 
     plt.figure(figsize = (6, 6))
 
