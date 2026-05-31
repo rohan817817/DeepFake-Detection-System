@@ -8,7 +8,7 @@ def predict_video(video_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model = DeepFakeModel().to(device)
-    model.load_state_dict(torch.load("outputs/checkpoints/deepfake_model.pth", map_location = device))
+    model.load_state_dict(torch.load("outputs/checkpoints/best_model.pth", map_location = device))
     model.eval()
 
     frames = extract_frames(video_path)

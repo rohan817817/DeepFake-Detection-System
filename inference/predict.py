@@ -10,7 +10,7 @@ print("Using Device:", device)
 
 model = DeepFakeModel().to(device)
 
-model.load_state_dict(torch.load("outputs/checkpoints/deepfake_model.pth", map_location = device)) #load model checkpoint
+model.load_state_dict(torch.load("outputs/checkpoints/best_model.pth", map_location = device)) #load model checkpoint
 
 model.eval() #set model to evaluation mode
 

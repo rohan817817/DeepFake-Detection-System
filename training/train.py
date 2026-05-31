@@ -47,7 +47,7 @@ model = DeepFakeModel().to(device)
 
 criterion = nn.CrossEntropyLoss() #loss function (measure how wrong is AI)
 
-optimizer = optim.Adam(model.parameters(), lr = 0.001) #optimizer
+optimizer = optim.Adam(model.parameters(), lr = 0.0001) #optimizer
 
 def evaluate(model, loader, device):
 
