@@ -28,8 +28,8 @@ train_paths, test_paths, train_labels, test_labels = train_test_split(video_path
 train_dataset = DeepFakeDataset(train_paths, train_labels)
 test_dataset = DeepFakeDataset(test_paths, test_labels)
 
-train_loader = DataLoader(train_dataset, batch_size = 2, shuffle = True, num_workers = 0)
-test_loader = DataLoader(test_dataset, batch_size = 2, shuffle = True, num_workers = 0)
+train_loader = DataLoader(train_dataset, batch_size = 8, shuffle = True, num_workers = 0)
+test_loader = DataLoader(test_dataset, batch_size = 8, shuffle = True, num_workers = 0)
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Using Device:", device)
@@ -70,7 +70,7 @@ def evaluate(model, loader, device):
 
 os.makedirs("outputs/checkpoints", exist_ok = True) #create directory for saving model checkpoints if it doesn't exist
 
-EPOCHS = 10
+EPOCHS = 20
 
 train_losses = []
 val_losses = []
@@ -92,7 +92,8 @@ for epoch in range(EPOCHS):
         labels = labels.to(device)
 
         optimizer.zero_grad() #clear gradients from previous step
-        print(f"Processing batch {batch_idx}")
+        if batch_idx % 5 == 0:
+            print(f"Processing batch {batch_idx}/{len(train_loader)}")
         outputs = model(frames)
 
         loss= criterion(outputs, labels) #calculate loss
