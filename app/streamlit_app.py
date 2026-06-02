@@ -66,7 +66,7 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
-st.title("🎭 DeepFake Detection System")
+st.title("DeepFake Detection System")
 st.caption("AI-powered video forgery detection using deep learning and explainable AI")
 
 st.sidebar.title("DeepFake Detection")
@@ -137,6 +137,7 @@ if uploaded_file is not None:
             )
 
         if prediction == "FAKE":
+
             if confidence >= 80:
                 risk = "HIGH RISK"
             elif confidence >= 50:
@@ -144,12 +145,14 @@ if uploaded_file is not None:
             else:
                 risk = "LOW RISK"
 
-        if risk == "HIGH RISK":
-            st.error(f"Risk Level: {risk}")
-        elif risk == "MEDIUM RISK":
-            st.warning(f"Risk Level: {risk}")
         else:
-            st.success(f"Risk Level: {risk}")
+
+            if confidence >= 80:
+                risk = "LOW RISK"
+            elif confidence >= 50:
+                risk = "LOW RISK"
+            else:
+                risk = "VERY LOW RISK"
 
         gradcam_path = generate_gradcam(temp_video_path)
         pdf_path = generate_report(label, confidence, risk, video_conf, audio_conf, gradcam_path)

@@ -2,6 +2,8 @@ venv/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+outputs/graphs/
+audio_data/
 reports/
 data/
 *.mp4
