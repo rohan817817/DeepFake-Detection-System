@@ -8,5 +8,4 @@ reports/
 data/
 *.mp4
 *.avi
-*.pth
 *.wav
